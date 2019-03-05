@@ -16,10 +16,10 @@ jobs:
           name: Deployment
           command: npm install
       
-      -run:
+      - run:
           name: check eslint
           command: npm run eslint
-          
+
       - save_cache:
           name: Saving cache (backend)
           paths:
