@@ -4,7 +4,6 @@ const context = canvas.getContext('2d')
 const playerID = 'player'
 const fps = 1000 / 30
 
-
 let objects = {}
 
 class Vector2d {
@@ -15,18 +14,27 @@ class Vector2d {
 }
 
 class GameObject {
-	constructor(size, position , texture) {
+	constructor(size, position, speed,texture) {
 		this.size = size,
 		this.position = position
 		this.texture = texture
+		this.speed = speed
+	}
+
+	moveXAxis(direction) {
+		this.position.x += (this.speed * direction)
+	}
+
+	moveYAxis(direction) {
+		this.position.y += (this.speed * direction)
 	}
 }
 
-const gamePlayer = new GameObject(new Vector2d(20,20), new Vector2d(50,50), '')
+const gamePlayer = new GameObject(new Vector2d(20,20), new Vector2d(50,50), 10, '')
 
 function init(){
 	objects[playerID] = gamePlayer
-	window.addEventListener('keypress', controller, false)
+	window.addEventListener('keypress', controller)
 }
 
 function render() {
@@ -43,12 +51,31 @@ function render() {
 }
 
 function controller(event){
-	console.log(event.keyCode)
+	const keyNumber = event.charCode
+	const playerObject = objects[playerID]
+	switch(keyNumber){
+	case 119: {		//w
+		playerObject.moveYAxis(-1) 
+		break
+	}	
+		
+	case 115:{ 		//s
+		playerObject.moveYAxis(1)
+		break
+	}	
+
+	case 97: {		//a
+		playerObject.moveXAxis(-1)
+		break	
+	}
+		
+	case 100: {		//d
+		playerObject.moveXAxis(1)
+		break
+	}		
+	}
 }
 
-function updatePosition(objectId, position) {
-	objects[objectId].position = position
-}
 
 function updateContext(){
 	context.clearRect(0, 0, canvas.width, canvas.height)
