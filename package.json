@@ -20,5 +20,8 @@
   "homepage": "https://github.com/michaelKurowski/ships#readme",
   "devDependencies": {
     "eslint": "^5.15.1"
+  },
+  "dependencies": {
+    "express": "^4.16.4"
   }
 }
