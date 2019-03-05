@@ -35,8 +35,14 @@ function setupEvents(socket) {
 	map.createShip({x: 0, y:0})
 		.then(ship => {
 			console.log('Ship created', ship)
+			socket.emit('spawn', {objectId: ship.id, position: ship.position})
 			socket.on('move', event => {
-				map.entites.get(event.objectId).move(event.position)
+				console.log('event', event.objectId)
+				console.log('entries', map.entities.entries())
+				map.entities.get(event.objectId).move(event.position)
+				map.entities.forEach(ship => {
+					socket.emit('move', {objectId: ship.id, position: ship.position})
+				})
 			})
 		})
 	socket.on('disconnect', () => {  
