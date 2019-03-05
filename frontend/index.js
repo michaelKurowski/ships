@@ -1,11 +1,13 @@
 const canvas = document.getElementById('canvas')
 const context = canvas.getContext('2d')
 
+const OBJECT_TYPES = ['PLAYER','PROJECTILE']
 const playerID = 'player'
 const fps = 1000 / 30
 
 let objects = {}
 
+const modulo = (firstNumber, secondNUmber) => (firstNumber % secondNUmber + secondNUmber) % secondNUmber
 class Vector2d {
 	constructor(x,y){
 		this.x = x,
@@ -14,13 +16,23 @@ class Vector2d {
 }
 
 class GameObject {
-	constructor(size, position, speed,texture) {
+	constructor(size, position, speed,texture, objectType) {
 		this.size = size,
 		this.position = position
 		this.texture = texture
 		this.speed = speed
+		this.objectType = objectType
 	}
 
+	swapPositionInBorder(borderWidth, borderHeight){
+		this.position.x = modulo(this.position.x, borderWidth)
+		this.position.y = modulo(this.position.y, borderHeight)
+	}
+
+	isInBorder(borderWidth, borderHeight){
+		return this.position.x >=0 && this.position.x <= borderWidth && this.position.y >= 0 && this.position.y <= borderHeight
+	}
+	
 	moveXAxis(direction) {
 		this.position.x += (this.speed * direction)
 	}
@@ -30,7 +42,7 @@ class GameObject {
 	}
 }
 
-const gamePlayer = new GameObject(new Vector2d(20,20), new Vector2d(50,50), 10, '')
+const gamePlayer = new GameObject(new Vector2d(20,20), new Vector2d(50,50), 10, '', OBJECT_TYPES[0])
 
 function init(){
 	objects[playerID] = gamePlayer
@@ -39,6 +51,10 @@ function init(){
 
 function render() {
 	Object.values(objects).forEach( gameObject => {
+		
+		if(gameObject.objectType === OBJECT_TYPES[0])
+			gameObject.checkBorder(canvas.width, canvas.height)
+
 		context.strokeRect(
 			gameObject.position.x,
 			gameObject.position.y,
@@ -75,7 +91,6 @@ function controller(event){
 	}		
 	}
 }
-
 
 function updateContext(){
 	context.clearRect(0, 0, canvas.width, canvas.height)
