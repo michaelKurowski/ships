@@ -1,0 +1,24 @@
+{
+  "name": "ships",
+  "version": "1.0.0",
+  "description": "Multiplayer Game",
+  "main": "./server/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./server/index.js",
+    "eslint": "node_modules/eslint/bin/eslint.js --ignore-path ./.eslintignore ./server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/michaelKurowski/ships.git"
+  },
+  "author": "Michael Kurowski, Marcin Grzeszczak",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/michaelKurowski/ships/issues"
+  },
+  "homepage": "https://github.com/michaelKurowski/ships#readme",
+  "devDependencies": {
+    "eslint": "^5.15.1"
+  }
+}
