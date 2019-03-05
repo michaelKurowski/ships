@@ -1,0 +1,29 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/node:10.15
+    steps:
+      - checkout
+      - restore_cache:
+          name: Restore cache (frontEnd)
+          keys:
+          - v2-dependencies-{{ checksum "server/package.json" }}
+          # fallback to using the latest cache if no exact match is found
+          - v2-dependencies-
+
+      - run: 
+          name: Deployment
+          command: cd server && npm install
+          
+      - save_cache:
+          name: Saving cache (backend)
+          paths:
+            - src/server/node_modules
+            - /home/circleci/.cache
+            - /home/circleci/.npm
+          key: v2-dependencies-{{ checksum "server/package.json" }}
+
+      - run:
+          name: Print the Current Time
+          command: date
