@@ -26,17 +26,22 @@ function startHttpServer() {
 }
 
 function startWebSocketServer() {
-	io.on('connection', socket => {
-		console.log('a user connected')
-		map.createShip({x: 0, y:0})
-			.then(ship => {
-				console.log('Ship created', ship)
-			})
-		socket.on('disconnect', () => {  
-			console.log('user disconnected')
-		})
-	})
+	io.on('connection', setupEvents)
 	io.on('error', error => console.log(error))
+}
+
+function setupEvents(socket) {
+	console.log('a user connected')
+	map.createShip({x: 0, y:0})
+		.then(ship => {
+			console.log('Ship created', ship)
+			socket.on('move', event => {
+				map.entites.get(event.objectId).move(event.position)
+			})
+		})
+	socket.on('disconnect', () => {  
+		console.log('user disconnected')
+	})
 }
 
 function init() {

@@ -18,4 +18,8 @@ module.exports = class Entity {
             })
         })
     }
+
+    move(position) {
+        this.position = position
+    }
 }
