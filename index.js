@@ -1,18 +1,49 @@
+
 const app = require('express')()
 const http = require('http').Server(app)
 const io = require('socket.io')(http)
 
-app.get('/', (req, res) => {
-	res.sendFile(`${__dirname}/frontend/index.html`)
-})
+const {World} = require('./classes')
+const settings = require('./settings.json')
 
-io.on('connection', socket => {
-	console.log('a user connected')
-	socket.on('disconnect', () => {  
-		console.log('user disconnected')
+let map
+
+init()
+
+function createWorld() {
+	map = new World(settings.world)
+	console.log('World created')
+}
+
+function startHttpServer() {
+	app.get('/', (req, res) => {
+		res.sendFile(`${__dirname}/frontend/index.html`)
 	})
-})
 
-http.listen(3000, () => {
-	console.log('listening on *:3000')
-})
+	http.listen(3000, () => {
+		console.log('listening on *:3000')
+	})
+}
+
+function startWebSocketServer() {
+	io.on('connection', socket => {
+		console.log('a user connected')
+		map.createShip({x: 0, y:0})
+			.then(ship => {
+				console.log('Ship created', ship)
+			})
+		socket.on('disconnect', () => {  
+			console.log('user disconnected')
+		})
+	})
+	io.on('error', error => console.log(error))
+}
+
+function init() {
+	createWorld()
+	startHttpServer()
+	startWebSocketServer()
+}
+
+
+
