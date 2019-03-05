@@ -8,13 +8,17 @@ jobs:
       - restore_cache:
           name: Restore cache (frontEnd)
           keys:
-          - v2-dependencies-{{ checksum "server/package.json" }}
+          - v2-dependencies-{{ checksum "package.json" }}
           # fallback to using the latest cache if no exact match is found
           - v2-dependencies-
 
       - run: 
           name: Deployment
-          command: cd server && npm install
+          command: npm install
+      
+      -run:
+          name: check eslint
+          command: npm run eslint
           
       - save_cache:
           name: Saving cache (backend)
@@ -22,7 +26,7 @@ jobs:
             - src/server/node_modules
             - /home/circleci/.cache
             - /home/circleci/.npm
-          key: v2-dependencies-{{ checksum "server/package.json" }}
+          key: v2-dependencies-{{ checksum "package.json" }}
 
       - run:
           name: Print the Current Time
