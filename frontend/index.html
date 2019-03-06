@@ -1,66 +1,78 @@
 <html>
     <head></head>
     <body>
+
         <canvas id="canvas" width="800" height="600"></canvas>
 
-
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js'></script>
         <script>
+          
             const canvas = document.getElementById('canvas')
             const context = canvas.getContext('2d')
 
+            const socket = io('http://localhost:3000')
+
             const OBJECT_TYPES = ['PLAYER','PROJECTILE']
-            const playerID = 'player'
             const fps = 1000 / 30
 
             let objects = {}
+            let playerID = ''
 
             const modulo = (firstNumber, secondNUmber) => (firstNumber % secondNUmber + secondNUmber) % secondNUmber
+            
             class Vector2d {
-                constructor(x,y){
-                    this.x = x,
-                    this.y = y
-                }
-            }
+		        constructor(x,y){
+			        this.x = x,
+			        this.y = y
+		        }
+	        }
 
             class GameObject {
-                constructor(size, position, speed,texture, objectType) {
+                constructor(size, position, speed, texture, objectType) {
                     this.size = size,
                     this.position = position
+                    this.updatedPosition = new Vector2d(0,0)
                     this.texture = texture
                     this.speed = speed
                     this.objectType = objectType
                 }
 
                 swapPositionOnBoard(borderWidth, borderHeight){
-                    this.position.x = modulo(this.position.x, borderWidth)
-                    this.position.y = modulo(this.position.y, borderHeight)
+                    this.updatedPosition.x = modulo(this.position.x, borderWidth)
+                    this.updatedPosition.y = modulo(this.position.y, borderHeight)
                 }
 
                 isOnBoard(borderWidth, borderHeight){
                     return this.position.x >=0 && this.position.x <= borderWidth && this.position.y >= 0 && this.position.y <= borderHeight
                 }
-                
+
                 moveXAxis(direction) {
-                    this.position.x += (this.speed * direction)
-                }
-
-                moveYAxis(direction) {
-                    this.position.y += (this.speed * direction)
-                }
+			        this.updatedPosition.x = this.position.x + (this.speed * direction)
+		        }
+	
+		        moveYAxis(direction) {
+			        this.updatedPosition.y += this.position.y + (this.speed * direction)
+		        }
+                
             }
+            
+            socket.on('spawn',object => {
+                playerID = object.objectId
+                console.log(`on spawn: ${object.objectId}`)
+                objects[playerID] = new GameObject(new Vector2d(20,20), object.position, 10,'',OBJECT_TYPES[0])
+            })
 
-            const gamePlayer = new GameObject(new Vector2d(20,20), new Vector2d(50,50), 10, '', OBJECT_TYPES[0])
+            socket.on('move',object => {
+                console.log(`on move: ${object.objectId}`)
+                objects[object.objectId].position = object.position
+            })
 
             function init(){
-                objects[playerID] = gamePlayer
-                window.addEventListener('keypress', controller)
-            }
+		        window.addEventListener('keypress', controller)
+	        }
 
             function render() {
                 Object.values(objects).forEach( gameObject => {
-                    
-                    if(gameObject.objectType === OBJECT_TYPES[0])
-                        gameObject.swapPositionOnBoard(canvas.width, canvas.height)
 
                     context.strokeRect(
                         gameObject.position.x,
@@ -68,9 +80,17 @@
                         gameObject.size.x,
                         gameObject.size.y
                     )
-                    context.stroke()
                 })
 
+            }
+
+            function updatePlayerPosition(id, playerGameObject){
+
+                if(playerGameObject.objectType === OBJECT_TYPES[0])
+                    playerGameObject.swapPositionOnBoard(canvas.width, canvas.height)
+
+                console.log(`emit move: ${id}`)
+                socket.emit('move', {objectId: id, position: playerGameObject.updatedPosition})
             }
 
             function controller(event){
@@ -97,6 +117,7 @@
                     break
                 }		
                 }
+                updatePlayerPosition(playerID, playerObject)
             }
 
             function updateContext(){
@@ -108,7 +129,7 @@
             setInterval(updateContext,fps)
         </script>
 
-        
+
     </body>
 </html>
 
