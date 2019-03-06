@@ -17,7 +17,7 @@ function createWorld() {
 
 function startHttpServer() {
 	app.get('/', (req, res) => {
-		res.sendFile(`${__dirname}/frontend/index.html`)
+		res.sendFile(`${__dirname}/frontend/index.html`)	
 	})
 
 	http.listen(3000, () => {
