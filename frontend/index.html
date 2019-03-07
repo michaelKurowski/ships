@@ -25,8 +25,8 @@
                     this.render = false
                 }
 
-                moveXAxis(direction) {this.nextPosition.x = (this.position.x + this.speed) * direction}
-                moveYAxis(direction) {this.nextPosition.y = (this.position.y + this.speed) * direction}
+                moveXAxis(direction) {this.nextPosition.x = this.position.x + this.speed * direction}
+                moveYAxis(direction) {this.nextPosition.y = this.position.y + this.speed * direction}
             }
 
             const fps = 1000 / 30
@@ -51,7 +51,35 @@
             socket.on('move', obj => {
                 if(obj.objectId === player.objectId)
                     player.position = obj.position
+                console.log(player)
             })
+
+
+            function controller(pressedKey) {
+                console.log(pressedKey)
+                switch(pressedKey.charCode){
+                    case 97: { 
+                        player.moveXAxis(-1)
+                        break
+                    }
+
+                    case 100: { 
+                        player.moveXAxis(1)
+                        break
+                    }
+
+                    case 115: { 
+                        player.moveYAxis(1)
+                        break
+                    }
+
+                    case 119: { 
+                        player.moveYAxis(-1)
+                        break
+                    }     
+                }
+                socket.emit('move',{objectId: player.objectId, position: player.nextPosition})
+            }
 
             function render() {
                 context.clearRect(0,0,borderWidth, borderHeight)
@@ -59,6 +87,7 @@
                     context.strokeRect(player.position.x, player.position.y, player.size.x, player.size.y)
             }
 
+            window.addEventListener('keypress',controller)
             setInterval(render,fps)
 
         </script>
