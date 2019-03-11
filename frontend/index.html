@@ -1,7 +1,97 @@
-Test file
+<html>
+    <head></head>
+    <body>
 
-<script src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js'></script>
+        <canvas id="canvas" width="800" height="600"></canvas>
 
-<script>
-    const socket = io('http://localhost:3000');
-</script>
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js'></script>
+        <script>
+            const socket = io('http://localhost:3000')
+
+            class Vector2D{
+                constructor(x,y){
+                    this.x = x
+                    this.y = y
+                }
+            }
+
+            class GameObject {
+                constructor(id, position, size){
+                    this.objectId
+                    this.position = position
+                    this.nextPosition = new Vector2D(0,0)
+                    this.size = size
+                    this.speed = 10
+                    this.render = false
+                }
+
+                moveXAxis(direction) {this.nextPosition.x = this.position.x + this.speed * direction}
+                moveYAxis(direction) {this.nextPosition.y = this.position.y + this.speed * direction}
+            }
+
+            const fps = 1000 / 30
+          
+            const canvas = document.getElementById('canvas')
+            const context = canvas.getContext('2d')
+            const borderWidth = canvas.width
+            const borderHeight = canvas.height
+
+            const modulo = (firstNumber, secondNUmber) => (firstNumber % secondNUmber + secondNUmber) % secondNUmber
+
+            const player = new GameObject(0, new Vector2D(0,0), new Vector2D(20,20))
+
+            socket.on('spawn', obj => {
+                player.objectId = obj.objectId
+                player.position = obj.position
+                player.render = true
+
+                console.log(player)
+            })
+
+            socket.on('move', obj => {
+                if(obj.objectId === player.objectId)
+                    player.position = obj.position
+                console.log(player)
+            })
+
+
+            function controller(pressedKey) {
+                console.log(pressedKey)
+                switch(pressedKey.charCode){
+                    case 97: { 
+                        player.moveXAxis(-1)
+                        break
+                    }
+
+                    case 100: { 
+                        player.moveXAxis(1)
+                        break
+                    }
+
+                    case 115: { 
+                        player.moveYAxis(1)
+                        break
+                    }
+
+                    case 119: { 
+                        player.moveYAxis(-1)
+                        break
+                    }     
+                }
+                socket.emit('move',{objectId: player.objectId, position: player.nextPosition})
+            }
+
+            function render() {
+                context.clearRect(0,0,borderWidth, borderHeight)
+                if(player.render)
+                    context.strokeRect(player.position.x, player.position.y, player.size.x, player.size.y)
+            }
+
+            window.addEventListener('keypress',controller)
+            setInterval(render,fps)
+
+        </script>
+
+
+    </body>
+</html>
