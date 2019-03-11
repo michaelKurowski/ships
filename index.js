@@ -69,11 +69,6 @@ function setupEvents(socket) {
 	})
 }
 
-function handleMoveEvent(socket) {
-	return event => {
-
-	}
-}
 
 function init() {
 	createWorld()
