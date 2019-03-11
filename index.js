@@ -5,6 +5,7 @@ const io = require('socket.io')(http)
 
 const {World} = require('./classes')
 const settings = require('./settings.json')
+const {createSpawnResponseDTO, createMoveResponseDTO, EVENTS} = require('./socketEvents')
 
 let map
 
@@ -35,17 +36,43 @@ function setupEvents(socket) {
 	map.createShip({x: 0, y:0})
 		.then(ship => {
 			console.log('Ship created', ship)
-			socket.emit('spawn', {objectId: ship.id, position: ship.position})
-			socket.on('move', event => {
-				map.entities.get(event.objectId).move(event.position)
-				map.entities.forEach(ship => {
-					socket.emit('move', {objectId: ship.id, position: ship.position})
-				})
+			const reponseToOwner = {
+				objectId: ship.id,
+				position: ship.position,
+				isBeingOwned: true
+			}
+			const reponseToOthers = {
+				objectId: ship.id,
+				position: ship.position
+			}
+			socket.emit(
+				EVENTS.SPAWN,
+				createSpawnResponseDTO(reponseToOwner)
+			)
+			socket.broadcast.emit(
+				EVENTS.SPAWN,
+				createSpawnResponseDTO(reponseToOthers)
+			)
+			socket.on(EVENTS.MOVE, event => {
+				const ship = map.entities.get(event.objectId)
+
+				ship.move(event.position)
+				const response = {objectId: ship.id, position: ship.position}
+			
+				
+				socket.broadcast.emit(EVENTS.MOVE, createMoveResponseDTO(response))
+				socket.emit(EVENTS.MOVE, createMoveResponseDTO(response))
 			})
 		})
 	socket.on('disconnect', () => {  
 		console.log('user disconnected')
 	})
+}
+
+function handleMoveEvent(socket) {
+	return event => {
+
+	}
 }
 
 function init() {
